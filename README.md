@@ -1,2 +1,2 @@
 # Credit Card Fraud Detection
- Machine Learning project to detect fraudulent credit cards using Python.
+ A machine Learning project to learn ML concepts and apply them to real-life situations. The program detects fraudulent credit cards using Python. Dataset imported from Kaggle.
