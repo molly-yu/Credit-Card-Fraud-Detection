@@ -21,7 +21,7 @@ print('Scipy: {}'.format(scipy.__version__))
 print('Sklearn: {}'.format(sklearn.__version__))
 
 
-# In[5]:
+# In[3]:
 
 
 import numpy as np
@@ -30,21 +30,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-# In[6]:
+# In[4]:
 
 
 # Load dataset from csv file using pandas
 data = pd.read_csv('creditcard.csv')
 
 
-# In[7]:
+# In[5]:
 
 
 # Explore dataset
 print(data.columns)
 
 
-# In[8]:
+# In[6]:
 
 
 print(data.shape) # num of transactions with columns
@@ -64,7 +64,7 @@ data = data.sample(frac = 0.1, random_state = 1)
 print(data.shape)
 
 
-# In[11]:
+# In[12]:
 
 
 # plot histogram of each parameter
@@ -72,7 +72,7 @@ data.hist(figsize = (20,20))
 plt.show()
 
 
-# In[12]:
+# In[13]:
 
 
 # if we look at classes, numbers near 0 are valid, numbers near 1 are fraudulent
@@ -86,7 +86,7 @@ print('Fraud Cases: {}'.format(len(Fraud)))
 print('Valid Cases: {}'.format(len(Valid)))
 
 
-# In[13]:
+# In[14]:
 
 
 # Correlation matrix (any correlations in dataset)
@@ -97,7 +97,7 @@ sns.heatmap(corrmat, vmax = .8, square = True)
 plt.show()
 
 
-# In[14]:
+# In[15]:
 
 
 # Get columns from DataFrame
@@ -116,6 +116,61 @@ Y = data[target] # class
 
 print(X.shape)
 print(Y.shape)
+
+
+# In[16]:
+
+
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.ensemble import IsolationForest # isolates features by randomly selecting features and splitting them
+from sklearn.neighbors import LocalOutlierFactor # find anomaly score of each sample, based on its neighbors
+
+# define a random state
+state = 1
+
+# define outlier detection methods
+classifiers = {
+    "Isolation Forest": IsolationForest(max_samples=len(X),
+                                       contamination = outlier_fraction, 
+                                       random_state = state),
+    "Local Outlier Factor": LocalOutlierFactor(n_neighbors=20,
+                                              contamination = outlier_fraction)
+}
+
+
+# In[20]:
+
+
+# fit the model
+n_outliers = len(Fraud)
+
+for i, (clf_name, clf) in enumerate(classifiers.items()):
+    # fit data, tag outliers
+    if clf_name == "Local Outlier Factor":
+        y_pred = clf.fit_predict(X)
+        scores_pred = clf.negative_outlier_factor_
+    else:
+        clf.fit(X)
+        scores_pred = clf.decision_function(X)
+        y_pred = clf.predict(X) # -1 for outlier, 1 for non-outlier
+        
+    # reshape prediction values from 0 to 1 
+    y_pred[y_pred == 1] = 0 # valid
+    y_pred[y_pred == -1] = 1 # fraud
+    
+    n_errors = (y_pred != Y).sum()
+    
+    # run classification metrics
+    print('{}:{}'.format(clf_name, n_errors))
+    print(accuracy_score(Y, y_pred))
+    print(classification_report(Y, y_pred)) # compare target Y to the predicted y
+
+
+# In[21]:
+
+
+# recall: false negatives, precision: false positives, f1-score: combination
+# Isolation forest shown to have better results than Local outlier factor
 
 
 # In[ ]:
