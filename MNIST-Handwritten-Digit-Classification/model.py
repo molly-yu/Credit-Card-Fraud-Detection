@@ -9,6 +9,7 @@ from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Dense
 from keras.layers import Flatten
+from keras.models import load_model
 from keras.optimizers import SGD
 
 
@@ -99,12 +100,25 @@ def run_test_harness():
     trainX, trainY, testX, testY = load_dataset()
     # prepare pixel data
     trainX, testX = prep_pixels(trainX, testX)
-    # evaluate model
-    scores, histories = evaluate_model(trainX, trainY)
-    # learning curves
-    summarize_diagnostics(histories)
-    # summarize estimated performance
-    summarize_performance(scores)
+
+    # # evaluate model
+    # scores, histories = evaluate_model(trainX, trainY)
+    # # learning curves
+    # summarize_diagnostics(histories)
+    # # summarize estimated performance
+    # summarize_performance(scores)
+
+    # define and fit model
+    model = define_model()
+    model.fit(trainX, trainY, epochs=10, batch_size=32, verbose=0)
+    # save model
+    model.save('final_model.h5')
+
+    # # load model
+    # model = load_model('final_model.h5')
+    # # evaluate model on test dataset
+    # _, acc = model.evaluate(testX, testY, verbose=0)
+    # print('>.3f' % (acc * 100.0))
 
 # run test haress
 run_test_harness()
