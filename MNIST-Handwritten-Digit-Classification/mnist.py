@@ -43,7 +43,7 @@ def define_model():
     model.add(Dense(10, activation='softmax'))
     # compile
     opt = SGD(lr=0.01, momentum=0.9)
-    model.compile(optimizer=opt, loss='categorial_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
     return model
 
 # evaluate model performance using k-fold cross-validation
@@ -66,3 +66,42 @@ def evaluate_model(dataX, dataY, n_folds=5):
         scores.append(acc)
         histories.append(history)
     return scores, histories
+
+# plot training curves
+def summarize_diagnostics(histories):
+    for i in range(len(histories)):
+        # plot loss
+        pyplot.subplot(2,1,1)
+        pyplot.title('Cross Entropy Loss')
+        pyplot.plot(histories[i].history['loss'], color='red', label='train')
+        pyplot.plot(histories[i].history['val_loss'], color='blue', label='test')
+        # plot accuracy
+        pyplot.subplot(2,1,2)
+        pyplot.title('Classification Accuracy')
+        pyplot.plot(histories[i].history['accuracy'], color='red', label='train')
+        pyplot.plot(histories[i].history['val_accuracy'], color='blue', label='test')
+    pyplot.show()
+
+# summarize model performance
+def summarize_performance(scores): 
+    # print summary
+    print('Accuracy : mean=%.3f std=%.3f, n=%d' % (mean(scores)*100, std(scores)*100, len(scores)))
+    # box and whisker plot
+    pyplot.boxplot(scores)
+    pyplot.show()
+
+# run test harness for evaluating model
+def run_test_harness():
+    # load dataset
+    trainX, trainY, testX, testY = load_dataset()
+    # prepare pixel data
+    trainX, testX = prep_pixels(trainX, testX)
+    # evaluate model
+    scores, histories = evaluate_model(trainX, trainY)
+    # learning curves
+    summarize_diagnostics(histories)
+    # summarize estimated performance
+    summarize_performance(scores)
+
+# run test haress
+run_test_harness()
